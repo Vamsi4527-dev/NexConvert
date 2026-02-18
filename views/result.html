@@ -1,1 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
 
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download Ready | NexConvert</title>
+    <link rel="stylesheet" href="/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <div class="nav-pill">
+                <a href="/" class="logo">Nex<span>Convert</span></a>
+                <a href="/" class="btn-nav">Home</a>
+            </div>
+        </header>
+
+        <section class="hero">
+            <div class="card result-container">
+                <div class="thumbnail-wrapper">
+                    <img id="thumbnail" src="" alt="Thumbnail">
+                </div>
+
+                <div class="video-info">
+                    <h2 class="video-title" id="title" style="font-size: 1.5rem; margin-top: 1rem;">Loading...</h2>
+                    <p class="video-meta">Duration: <span id="duration">--:--</span></p>
+                </div>
+
+                <div style="width: 100%;">
+                    <button id="downloadBtn" class="download-btn-animated">Download Now</button>
+                    <p id="statusMsg"
+                        style="margin-top: 1rem; font-size: 0.875rem; color: var(--text-muted); display: none;">
+                        Preparing your file, please wait...</p>
+                </div>
+
+                <a href="/converter" class="back-link">Convert another video</a>
+            </div>
+        </section>
+
+        <footer>
+            <p>&copy; 2026 NexConvert all rights recived. For personal use only.</p>
+        </footer>
+    </div>
+
+    <script>
+        const info = JSON.parse(sessionStorage.getItem('videoInfo'));
+
+        if (!info) {
+            window.location.href = '/converter';
+        } else {
+            document.getElementById('title').innerText = info.title;
+            document.getElementById('thumbnail').src = info.thumbnail;
+            document.getElementById('duration').innerText = info.duration;
+
+            const downloadBtn = document.getElementById('downloadBtn');
+            const statusMsg = document.getElementById('statusMsg');
+
+            downloadBtn.addEventListener('click', () => {
+                const downloadUrl = `/download?url=${encodeURIComponent(info.url)}&format=${info.format}`;
+
+                downloadBtn.disabled = true;
+                downloadBtn.innerText = 'Processing...';
+                statusMsg.style.display = 'block';
+
+                window.location.href = downloadUrl;
+
+                setTimeout(() => {
+                    downloadBtn.disabled = false;
+                    downloadBtn.innerText = 'Download Now';
+                    statusMsg.style.display = 'none';
+                }, 10000); 
+            });
+        }
+    </script>
+</body>
+
+</html>

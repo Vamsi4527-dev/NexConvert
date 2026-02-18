@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexConvert | Start Your Download</title>
+    <link rel="stylesheet" href="/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <div class="nav-pill">
+                <a href="/" class="logo">Nex<span>Convert</span></a>
+                <a href="/" class="btn-nav">Home</a>
+            </div>
+        </header>
+        
+        
+        <section class="hero"><br>
+            <h1>Start Your Download</h1> <br>
+            <div class="card">
+                <p class="subtitle">Paste your YouTube link below and choose your preferred format.</p>
+
+                <div class="form-container">
+                    <form id="convertForm">
+                        <div class="input-group">
+                            <input type="text" id="videoUrl" placeholder="https://youtube.com/watch?v=..." required>
+                        </div>
+
+                        <div class="input-group">
+                            <select id="format">
+                                <option value="mp4">Video (MP4)</option>
+                                <option value="mp3">Audio (MP3)</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" style="width: 100%;" id="submitBtn">
+                            <span id="btnText">Convert Now</span>
+                            <div id="loader" style="display: none;">
+                                <span class="loader"></span>
+                            </div>
+                        </button>
+                    </form>
+                </div>
+
+                <a href="/" class="back-link">← Back to home</a>
+                <div id="error" style="color: #ef4444; margin-top: 1rem; display: none; font-size: 0.875rem;"></div>
+            </div>
+        </section>
+
+        <footer>
+            <p>&copy; 2026 NexConvert all rights recived. For personal use only.</p>
+        </footer>
+    </div>
+
+    <script>
+        document.getElementById('convertForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const url = document.getElementById('videoUrl').value;
+            const format = document.getElementById('format').value;
+            const btn = document.getElementById('submitBtn');
+            const loader = document.getElementById('loader');
+            const errorDiv = document.getElementById('error');
+            const btnText = document.getElementById('btnText');
+
+            errorDiv.style.display = 'none';
+            btn.disabled = true;
+            btnText.style.display = 'none';
+            loader.style.display = 'inline-block';
+
+            try {
+                const response = await fetch('/api/info', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    sessionStorage.setItem('videoInfo', JSON.stringify({
+                        ...data,
+                        format: format
+                    }));
+                    window.location.href = '/result';
+                } else {
+                    errorDiv.innerText = data.error || 'Something went wrong';
+                    errorDiv.style.display = 'block';
+                }
+            } catch (err) {
+                errorDiv.innerText = 'Connection error. Is the server running?';
+                errorDiv.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                btnText.style.display = 'inline';
+                loader.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+
+</html>
