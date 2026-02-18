@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: nexconvert-pro
+    env: docker
+    plan: free
+    region: ohio
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: NODE_ENV
+        value: production

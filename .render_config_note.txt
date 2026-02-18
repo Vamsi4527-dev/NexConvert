@@ -1,0 +1,11 @@
+language: node_js
+node_js:
+  - "20"
+
+# Build command - install dependencies
+install:
+  - npm install
+
+# In a real build environment, we would also install yt-dlp
+# But for Render/Railway/Vercel, we can often use build scripts
+# or environment-specific packages.
