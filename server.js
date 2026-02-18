@@ -25,18 +25,33 @@ app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'views', 'index.htm
 app.get('/converter', (req, res) => res.sendFile(path.join(__dirname, 'views', 'converter.html')));
 app.get('/result', (req, res) => res.sendFile(path.join(__dirname, 'views', 'result.html')));
 
+// Helper: Validate YouTube URL
+function isValidYoutubeUrl(url) {
+    const regex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/;
+    return regex.test(url);
+}
+
 // API: Get Video Information (Title, Thumbnail, etc.)
 app.post('/api/info', (req, res) => {
     const { url } = req.body;
-    if (!url) return res.status(400).json({ error: 'URL is required' });
+    if (!url || !isValidYoutubeUrl(url)) {
+        return res.status(400).json({ error: 'Please provide a valid YouTube URL' });
+    }
 
-    const args = getArgs(['--print-json', '--skip-download', url]);
+    const args = getArgs(['--print-json', '--skip-download', '--no-warnings', url]);
     const yt = spawn(ytCmd, args);
 
     let output = '';
+    let errorOutput = '';
+
     yt.stdout.on('data', (data) => output += data.toString());
+    yt.stderr.on('data', (data) => errorOutput += data.toString());
+
     yt.on('close', (code) => {
-        if (code !== 0) return res.status(500).json({ error: 'Failed to fetch video info' });
+        if (code !== 0) {
+            console.error(`yt-dlp error: ${errorOutput}`);
+            return res.status(500).json({ error: 'Failed to fetch video info. Try again later.' });
+        }
         try {
             const meta = JSON.parse(output);
             res.json({
@@ -46,7 +61,8 @@ app.post('/api/info', (req, res) => {
                 url: url
             });
         } catch (e) {
-            res.status(500).json({ error: 'Parsing error' });
+            console.error('Parsing error:', e);
+            res.status(500).json({ error: 'Failed to process video data' });
         }
     });
 });
