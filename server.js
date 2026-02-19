@@ -6,32 +6,32 @@ const fs = require('fs');
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-// Middleware
-app.use(express.json());
-app.use(express.static('public')); // Serves CSS
-app.use(express.static('views'));  // Serves HTML
 
-// Ensure downloads folder exists
+app.use(express.json());
+app.use(express.static('public')); 
+app.use(express.static('views'));  
+
+
 const downloadsDir = path.join(__dirname, 'downloads');
 if (!fs.existsSync(downloadsDir)) fs.mkdirSync(downloadsDir);
 
-// Helper for yt-dlp (Shared by Info and Download)
+
 const isWindows = process.platform === 'win32';
 const ytCmd = isWindows ? 'python' : 'yt-dlp';
 const getArgs = (args) => isWindows ? ['-m', 'yt_dlp', ...args] : args;
 
-// Page Routes
+
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'views', 'index.html')));
 app.get('/converter', (req, res) => res.sendFile(path.join(__dirname, 'views', 'converter.html')));
 app.get('/result', (req, res) => res.sendFile(path.join(__dirname, 'views', 'result.html')));
 
-// Helper: Validate YouTube URL
+
 function isValidYoutubeUrl(url) {
     const regex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/;
     return regex.test(url);
 }
 
-// API: Get Video Information (Title, Thumbnail, etc.)
+
 app.post('/api/info', (req, res) => {
     const { url } = req.body;
     if (!url || !isValidYoutubeUrl(url)) {
@@ -67,7 +67,7 @@ app.post('/api/info', (req, res) => {
     });
 });
 
-// API: Download Video or Audio
+
 app.get('/download', (req, res) => {
     const { url, format } = req.query;
     if (!url) return res.status(400).send('URL is required');
@@ -85,9 +85,10 @@ app.get('/download', (req, res) => {
     yt.on('close', (code) => {
         if (code !== 0) return res.status(500).send('Download failed');
         res.download(outputPath, () => {
-            fs.unlink(outputPath, () => { }); // Delete file after download
+            fs.unlink(outputPath, () => { }); 
         });
     });
 });
 
 app.listen(PORT, () => console.log(`Server: http://localhost:${PORT}`));
+
